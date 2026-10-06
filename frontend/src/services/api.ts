@@ -24,7 +24,13 @@ import type {
   OptimizationCapabilities,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+// In production the frontend calls the backend through the same origin under
+// `/api/v1`, which Vercel routes to the FastAPI service (see the root
+// vercel.json). Local development talks to the backend directly. Either can be
+// overridden with VITE_API_BASE_URL.
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? '/api/v1' : 'http://localhost:8000/api/v1');
 
 // ─── Generic fetch wrapper ────────────────────────────────────────────────────
 
