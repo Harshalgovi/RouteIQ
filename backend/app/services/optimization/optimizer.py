@@ -27,7 +27,14 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional
 
-from ortools.constraint_solver import pywrapcp
+# OR-Tools ships a large native wheel. Some serverless hosts cannot install or
+# load it, and a top-level import failure here would abort the whole application
+# at startup — every endpoint, including /health, would 500. Import it defensively
+# so the rest of the API stays up and only route optimisation reports unavailable.
+try:  # pragma: no cover - depends on the deployment environment
+    from ortools.constraint_solver import pywrapcp
+except Exception:  # noqa: BLE001
+    pywrapcp = None  # type: ignore[assignment]
 
 from app.services.geocoding.base import Coordinates
 from app.services.optimization.models import (
@@ -50,6 +57,16 @@ from app.services.optimization.models import (
 from app.services.routing.base import MatrixResult
 
 logger = logging.getLogger("routeiq.services.optimization.optimizer")
+
+
+class SolverUnavailableError(RuntimeError):
+    """Raised when the OR-Tools routing solver is not usable in this deployment."""
+
+    http_status = 503
+    user_message = (
+        "Route optimisation is unavailable on this server: the OR-Tools solver "
+        "could not be loaded. The rest of RouteIQ is unaffected."
+    )
 
 #: Weights and distances are converted to integer grams / metres so OR-Tools
 #: integer arithmetic never loses precision on fractional kilogram loads.
@@ -223,6 +240,9 @@ def solve(
     Returns an `OptimizationResult`; never raises for an unsolvable-but-valid
     problem — that is reported as `OptimizationStatus.INFEASIBLE` with a reason.
     """
+    if pywrapcp is None:
+        raise SolverUnavailableError(SolverUnavailableError.user_message)
+
     matrix = matrix or problem.matrix
     if matrix is None:
         raise ValueError("A travel matrix is required before solving.")

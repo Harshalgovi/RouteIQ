@@ -100,7 +100,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <AlertTriangle size={14} aria-hidden="true" />
           <span>
             Showing development data — the backend is unreachable, so nothing below reflects live
-            records.
+            records.{loadError ? ` (${loadError})` : ''}
           </span>
           <button type="button" className="btn btn-ghost btn-xs" onClick={refreshData}>
             Retry

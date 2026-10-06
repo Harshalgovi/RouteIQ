@@ -54,6 +54,15 @@ def provider_error_to_http(exc: BaseException) -> HTTPException:
         )
         return HTTPException(status_code=exc.http_status, detail=detail, headers=headers)
 
+    # A few non-provider failures still declare their own HTTP contract (for
+    # example the OR-Tools solver being unavailable in this deployment). Honour
+    # it rather than flattening them all to a generic 502.
+    http_status = getattr(exc, "http_status", None)
+    if isinstance(http_status, int):
+        user_message = getattr(exc, "user_message", None) or str(exc)
+        logger.warning("[api] %s: %s", type(exc).__name__, user_message)
+        return HTTPException(status_code=http_status, detail=user_message)
+
     # Any other failure (bug, unexpected payload shape, ...).
     logger.exception("Unhandled error while contacting a map service provider")
     return HTTPException(

@@ -2,6 +2,7 @@
 Main FastAPI application entry point for RouteIQ.
 """
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,11 +16,27 @@ import app.models  # noqa: F401
 
 from app.api.router import api_router
 
+logger = logging.getLogger("routeiq.main")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create database tables on startup (dev convenience; production uses Alembic migrations)
-    Base.metadata.create_all(bind=engine)
+    # Creating the schema is a development convenience; production uses Alembic
+    # migrations. It must never abort startup: on hosts with a read-only
+    # filesystem (or an unreachable/absent DATABASE_URL) the default SQLite URL
+    # cannot even open its file, and an unhandled error here would take down
+    # every route — including /health, which is how the frontend learns the
+    # backend is up. Log and continue instead; individual endpoints and the
+    # health check then report the real state honestly.
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as exc:  # noqa: BLE001 - startup must not crash
+        logger.warning(
+            "Could not create database schema at startup (%s). "
+            "The API will continue to serve; set DATABASE_URL to a reachable "
+            "PostgreSQL instance and run migrations.",
+            exc,
+        )
     yield
 
 

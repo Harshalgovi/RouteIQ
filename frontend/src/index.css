@@ -2758,19 +2758,41 @@ body {
   font-weight: 600;
 }
 
+.ops-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+.ops-summary-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
 .ops-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 0.85rem;
   margin-bottom: 1.25rem;
+  list-style: none;
+  padding: 0;
 }
 
-.ops-metric {
+.ops-summary-cell {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.4rem;
-  padding: 0.95rem 1rem;
+}
+
+.ops-summary-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   background: var(--bg-card);
@@ -2781,66 +2803,134 @@ body {
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
-.ops-metric:hover {
+.ops-summary-button:hover {
   border-color: var(--border-active);
   background: var(--bg-card-hover);
   transform: translateY(-1px);
 }
 
-.ops-metric.is-static {
+.ops-summary-button:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.ops-summary-button.is-static {
   cursor: default;
 }
 
-.ops-metric.is-static:hover {
+.ops-summary-button.is-static:hover {
   transform: none;
   border-color: var(--border-color);
   background: var(--bg-card);
 }
 
-.ops-metric-top {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  width: 100%;
-}
-
-.ops-metric-icon {
+.ops-summary-icon {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   background: var(--bg-tertiary);
-  color: var(--text-secondary);
+  color: var(--accent-primary);
   flex-shrink: 0;
 }
 
-.ops-metric-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+.ops-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
 }
 
-.ops-metric-value {
-  font-size: 1.7rem;
-  font-weight: 700;
+.ops-summary-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ops-summary-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.ops-summary-value {
+  font-size: 1.55rem;
+  font-weight: 800;
   line-height: 1.1;
+  font-family: var(--font-mono);
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  text-align: right;
 }
 
-.ops-metric-detail {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.ops-metric.is-success .ops-metric-value { color: var(--status-success); }
-.ops-metric.is-warning .ops-metric-value { color: var(--status-warning); }
-.ops-metric.is-danger .ops-metric-value { color: var(--status-error); }
-.ops-metric.is-info .ops-metric-value { color: var(--status-info); }
+.ops-summary-value.tone-success { color: var(--status-success); }
+.ops-summary-value.tone-warning { color: var(--status-warning); }
+.ops-summary-value.tone-danger { color: var(--status-error); }
+.ops-summary-value.tone-info { color: var(--status-info); }
 
 /* -- Live fleet map ----------------------------------------------------- */
+
+/*
+ * `.live-fleet` is the dashboard card that wraps the live map. The header row
+ * pairs a title/subtitle with the map actions ("Fit all", "Manage tracking");
+ * without these rules the actions collided with the title and the card had no
+ * frame, so the map controls read as floating white buttons.
+ */
+.live-fleet {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.live-fleet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.live-fleet-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.live-fleet-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.live-fleet-title svg {
+  color: var(--accent-primary);
+}
+
+.live-fleet-subtitle {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.live-fleet-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
 
 .live-fleet-map {
   position: relative;
@@ -3974,7 +4064,7 @@ body {
 
 /* Respect the OS reduced-motion setting for the few transitions added above. */
 @media (prefers-reduced-motion: reduce) {
-  .ops-metric,
+  .ops-summary-button,
   .metric-card,
   .quick-action,
   .active-route-item,
@@ -3982,7 +4072,7 @@ body {
     transition: none;
   }
 
-  .ops-metric:hover,
+  .ops-summary-button:hover,
   .metric-card:hover {
     transform: none;
   }

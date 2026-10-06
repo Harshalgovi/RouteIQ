@@ -66,6 +66,7 @@ _REQUEST_REASON_STATUS = {
         422: {"description": "Missing coordinates, no available vehicles, or bad input"},
         429: {"description": "Routing provider rate limit reached"},
         502: {"description": "Routing provider unavailable or returned an error"},
+        503: {"description": "The OR-Tools routing solver is unavailable on this server"},
         504: {"description": "Routing provider timed out"},
     },
 )
