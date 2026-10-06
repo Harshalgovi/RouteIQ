@@ -130,7 +130,9 @@ def seed_vehicles(db, drivers: list[Driver]) -> list[Vehicle]:
             "tracking_enabled": False,         # ← not tracked (demonstrates empty state)
             "current_latitude": 12.9784,       # Indiranagar
             "current_longitude": 77.6408,
-            "driver_id": drivers[2].id,
+            # Intentionally unassigned: a vehicle can sit in the fleet waiting
+            # for a driver, which the UI reports honestly.
+            "driver_id": None,
         },
     ]
 
