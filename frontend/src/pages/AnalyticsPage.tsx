@@ -7,7 +7,17 @@ import { FleetCapacity } from '../components/FleetCapacity';
 import { RoutePerformance } from '../components/RoutePerformance';
 import { LoadingState } from '../components/LoadingState';
 import { ErrorState } from '../components/ErrorState';
-import { BarChart3, Info } from 'lucide-react';
+import {
+  BarChart3,
+  Package,
+  CheckCircle2,
+  AlertTriangle,
+  Inbox,
+  Truck,
+  Navigation,
+  Clock,
+  Info,
+} from 'lucide-react';
 import { apiTimestampMs } from '../utils/datetime';
 import type { NavTab } from '../types';
 
@@ -15,13 +25,10 @@ interface AnalyticsPageProps {
   onNavigate: (tab: NavTab, filter?: string) => void;
 }
 
-const formatMinutes = (value: number): string =>
-  value >= 60 ? `${Math.floor(value / 60)} h ${Math.round(value % 60)} min` : `${Math.round(value)} min`;
-
 /**
  * Analytics — answers four operator questions.
  *
- *   1. How is today going?          → Today's Operations
+ *   1. How is today going?          → Today's Operations KPI cards
  *   2. Did optimization help?       → Route Optimization Impact
  *   3. How full are the vehicles?   → Fleet Capacity
  *   4. Who is carrying the work?    → Route Performance
@@ -60,7 +67,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ onNavigate }) => {
         title="Cannot load analytics"
         message={
           loadError ??
-          'RouteIQ could not read deliveries or vehicles, so there is nothing to analyse. This is not a substitute for zero activity.'
+          'RouteIQ could not read deliveries or vehicles, so there is nothing to analyse.'
         }
         onRetry={refreshData}
       />
@@ -71,13 +78,14 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="analytics-page">
+      {/* ── Page header ── */}
       <div className="page-action-header">
         <div>
           <h2 className="section-title">
             <BarChart3 size={20} aria-hidden="true" /> Analytics
           </h2>
           <p className="section-subtitle">
-            Delivery performance from live records, and measured impact from route optimization.
+            Delivery performance from live records, and measured route optimization impact.
           </p>
         </div>
         {dataSource === 'mock' && (
@@ -85,79 +93,89 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ onNavigate }) => {
         )}
       </div>
 
-      {/* 1. Today's operations — plain counts with stated meaning. */}
+      {/* ── 1. Today's Operations KPI cards ── */}
       <section className="analytics-section" aria-labelledby="today-heading">
         <div className="analytics-section-head">
           <h3 id="today-heading" className="analytics-section-title">
             Today&rsquo;s Operations
           </h3>
           <p className="analytics-section-subtitle">
-            Counts taken directly from the delivery records in the database.
+            Counts from the live database. Click any card to see the filtered list.
           </p>
         </div>
 
         <div className="analytics-metrics-grid">
           <AnalyticsMetric
+            icon={Package}
             label="Deliveries today"
             value={summary.deliveriesToday}
-            explanation={`Deliveries created today. ${summary.deliveriesTotal} exist in total.`}
+            explanation={`Created today · ${summary.deliveriesTotal} total`}
             onClick={() => onNavigate('deliveries')}
+            actionHint="Opens the deliveries list"
           />
           <AnalyticsMetric
+            icon={CheckCircle2}
             label="Completed"
             value={summary.deliveriesDelivered}
-            explanation="Deliveries whose status is delivered."
+            explanation="Successfully delivered"
             tone={summary.deliveriesDelivered > 0 ? 'success' : 'default'}
             onClick={() => onNavigate('deliveries', 'delivered')}
           />
           <AnalyticsMetric
+            icon={AlertTriangle}
             label="Delayed"
             value={summary.deliveriesDelayed}
-            explanation="Deliveries explicitly marked as delayed. These need a decision."
+            explanation="Need attention now"
             tone={summary.deliveriesDelayed > 0 ? 'danger' : 'success'}
             onClick={() => onNavigate('deliveries', 'delayed')}
           />
           <AnalyticsMetric
+            icon={Inbox}
             label="Open work"
             value={openWork}
-            explanation="Deliveries still pending, assigned, or in transit — not yet delivered or cancelled."
+            explanation="Pending, assigned, or in transit"
           />
           <AnalyticsMetric
+            icon={Navigation}
             label="Not on a vehicle"
             value={summary.deliveriesUnassigned}
-            explanation="Open deliveries with no vehicle assigned. These cannot be routed until a vehicle takes them."
+            explanation="Unassigned open deliveries"
             tone={summary.deliveriesUnassigned > 0 ? 'warning' : 'success'}
             onClick={() => onNavigate('planner')}
+            actionHint="Opens Route Planner"
           />
           <AnalyticsMetric
+            icon={Truck}
             label="Active vehicles"
             value={summary.vehiclesDispatchable}
-            explanation="Vehicles with an available or active status — the only ones the route optimizer will use."
+            explanation="Available or active status"
             onClick={() => onNavigate('vehicles', 'dispatchable')}
           />
           <AnalyticsMetric
+            icon={Navigation}
             label="Total route distance"
             value={plannedDistanceKm !== null ? `${plannedDistanceKm.toFixed(1)} km` : null}
             unavailableLabel="Not available"
-            unavailableReason="Run the Route Planner to produce a plan."
+            unavailableReason="Run Route Planner to generate a plan."
             explanation={
               plannedDistanceKm !== null
-                ? 'Distance of the last optimization plan, measured on real roads by the routing provider.'
+                ? 'Distance of the last optimization plan, on real roads.'
                 : 'Real driving distance for the last optimization plan.'
             }
             onClick={() => onNavigate('planner')}
           />
           <AnalyticsMetric
+            icon={Clock}
             label="Average delivery time"
             value={null}
             unavailableLabel="Not available"
-            unavailableReason="Requires delivery history."
-            explanation="Time from arrival to completion, averaged across deliveries. RouteIQ records no completion timestamp, so this cannot be computed."
+            unavailableReason="Requires completed delivery history."
+            explanation="Time from dispatch to completion, averaged across deliveries."
           />
         </div>
       </section>
 
-      {/* 2. Optimization impact — real baseline comparison or an honest gap. */}
+      {/* ── 2. Optimization impact ── */}
       <section className="analytics-section" aria-labelledby="impact-section-heading">
         <div className="analytics-section-head">
           <h3 id="impact-section-heading" className="analytics-section-title">
@@ -173,7 +191,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ onNavigate }) => {
         />
       </section>
 
-      {/* 3 + 4. Capacity and per-vehicle performance. */}
+      {/* ── 3 + 4. Capacity and per-vehicle performance ── */}
       <section className="analytics-section" aria-labelledby="efficiency-heading">
         <div className="analytics-section-head">
           <h3 id="efficiency-heading" className="analytics-section-title">
@@ -194,7 +212,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 5. What cannot be shown, stated plainly. */}
+      {/* ── 5. What cannot be shown, stated plainly ── */}
       <section className="card analytics-limits" aria-labelledby="limits-heading">
         <div className="card-header-flex">
           <div>
@@ -235,5 +253,3 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ onNavigate }) => {
     </div>
   );
 };
-
-export const analyticsFormatDuration = formatMinutes;

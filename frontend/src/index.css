@@ -3445,8 +3445,8 @@ body {
 
 .analytics-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
 }
 
 .analytics-split {
@@ -3490,12 +3490,28 @@ body {
   color: var(--text-primary);
 }
 
+/* ── metric-card label-row (icon + text in one line) ─────────────── */
+
+.metric-card-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.metric-card-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
 /* Metric card: value, then why it matters, then the next action. */
 .metric-card {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.95rem 1rem;
+  gap: 0;
+  padding: 1.1rem 1.2rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   background: var(--bg-card);
@@ -3521,15 +3537,20 @@ body {
 }
 
 .metric-card-label {
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  line-height: 1;
 }
 
 .metric-card-value {
-  font-size: 1.65rem;
+  font-size: 1.85rem;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1;
+  margin-top: 0.55rem;
+  margin-bottom: 0.25rem;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -3541,16 +3562,20 @@ body {
 
 /* "Not available" is a first-class state, styled as muted rather than zero. */
 .metric-card-value.is-unavailable {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-muted);
   font-style: italic;
+  margin-top: 0.55rem;
+  margin-bottom: 0.2rem;
 }
 
 .metric-card-explanation {
-  font-size: 0.72rem;
-  line-height: 1.45;
-  color: var(--text-muted);
+  font-size: 0.73rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  margin-top: auto;
+  padding-top: 0.4rem;
 }
 
 .metric-card-reason {

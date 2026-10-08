@@ -32,6 +32,9 @@ interface AnalyticsMetricProps {
 /**
  * A single explained metric.
  *
+ * Uses the existing RouteIQ `.metric-card` CSS classes so it inherits the
+ * dark-card design from the rest of the application automatically.
+ *
  * The contract for every number in RouteIQ: a name, a value, and one sentence
  * saying what it counts and why it matters. When the backend cannot supply the
  * value the component says so plainly instead of rendering a plausible-looking
@@ -51,45 +54,66 @@ export const AnalyticsMetric: React.FC<AnalyticsMetricProps> = ({
   actionHint,
 }) => {
   const isAvailable = value !== null && value !== undefined;
-  const Wrapper = onClick ? 'button' : 'div';
 
-  return (
-    <Wrapper
-      className={`analytics-metric ${onClick ? 'is-clickable' : ''} ${isAvailable ? '' : 'is-unavailable'}`}
-      {...(onClick
-        ? {
-            type: 'button' as const,
-            onClick,
-            'aria-label': `${label}: ${isAvailable ? value : unavailableLabel}. ${explanation}${
-              actionHint ? `. ${actionHint}` : ''
-            }`,
-          }
-        : {})}
-    >
-      <div className="analytics-metric-head">
-        <span className="analytics-metric-label">{label}</span>
+  // Tone class applied to the card so the CSS rules
+  // `.metric-card.is-success .metric-card-value` etc. take effect.
+  const toneClass = tone !== 'default' ? `is-${tone}` : '';
+  const staticClass = !onClick ? 'is-static' : '';
+
+  const ariaLabel = onClick
+    ? `${label}: ${isAvailable ? value : unavailableLabel}. ${explanation}${actionHint ? `. ${actionHint}` : ''}`
+    : undefined;
+
+  const content = (
+    <>
+      {/* Label row — icon + text on the same line */}
+      <div className="metric-card-label-row">
         {Icon && (
-          <span className="analytics-metric-icon" aria-hidden="true">
-            <Icon size={15} />
+          <span className="metric-card-icon" aria-hidden="true">
+            <Icon size={14} />
           </span>
         )}
+        <span className="metric-card-label">{label}</span>
       </div>
 
+      {/* Value — large and prominent, clearly separated from the label */}
       {isAvailable ? (
         <>
-          <span className={`analytics-metric-value tone-${tone}`}>{value}</span>
-          {comparison && <span className="analytics-metric-comparison">{comparison}</span>}
+          <span className="metric-card-value">{value}</span>
+          {comparison && (
+            <span className="metric-card-reason">{comparison}</span>
+          )}
         </>
       ) : (
         <>
-          <span className="analytics-metric-value is-placeholder">{unavailableLabel}</span>
+          <span className="metric-card-value is-unavailable">{unavailableLabel}</span>
           {unavailableReason && (
-            <span className="analytics-metric-comparison">{unavailableReason}</span>
+            <span className="metric-card-reason">{unavailableReason}</span>
           )}
         </>
       )}
 
-      <span className="analytics-metric-explanation">{explanation}</span>
-    </Wrapper>
+      {/* Explanation — always shown below the value */}
+      <span className="metric-card-explanation">{explanation}</span>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={`metric-card ${toneClass}`.trim()}
+        onClick={onClick}
+        aria-label={ariaLabel}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={`metric-card ${toneClass} ${staticClass}`.trim()}>
+      {content}
+    </div>
   );
 };
